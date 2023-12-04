@@ -141,24 +141,26 @@ void addBigNumbers(const BigNumber *num1, const BigNumber *num2, BigNumber *resu
     int len1 = strlen(num1->digits);
     int len2 = strlen(num2->digits);
     int len = len1 > len2 ? len1 : len2;
-    char *res = (char *)malloc(len + 2); // +2 for possible carry and null terminator
+    char *res = (char *)malloc(len + 2); // +2 para possível carry e para '/0'
     if (res == NULL)
     {
         fprintf(stderr, "Erro ao alocar memoria para resultado\n");
         exit(EXIT_FAILURE);
     }
     memset(res, '0', len + 1);
-    res[len + 1] = '\0'; // Null terminate the string
+    res[len + 1] = '\0';
 
     int isNegative1 = num1->digits[0] == '-';
     int isNegative2 = num2->digits[0] == '-';
 
+    // Inverte os digitos para fazer a soma a mão
     reverseString(num1->digits);
     reverseString(num2->digits);
 
     int carry = 0;
     int digit1;
     int digit2;
+    // Soma a mão
     for (int i = 0; i < len; i++)
     {
         digit1 = i < len1 ? abs(charToDigit(num1->digits[i])) : 0;
@@ -208,12 +210,13 @@ void addBigNumbers(const BigNumber *num1, const BigNumber *num2, BigNumber *resu
     }
 
     reverseString(res);
-    // Remove leading zeros
+    // Remove zeros a esquerda
     while (*res == '0' && *(res + 1) != '\0')
     {
         memmove(res, res + 1, strlen(res));
     }
 
+    // Adiciona sinal negativo caso necessário
     if ((isNegative1 && isNegative2))
     {
         memmove(res + 1, res, strlen(res) + 1);
