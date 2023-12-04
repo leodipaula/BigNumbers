@@ -3,6 +3,57 @@
 #include <stdlib.h>
 #include <string.h>
 
+// Função que compara se o primeiro número é maior que o segundo
+int isGreaterThan(const char *num1, const char *num2)
+{
+    // Remove possíveis zeros à esquerda
+    while (*num1 == '0' && *(num1 + 1) != '\0')
+    {
+        num1++;
+    }
+
+    while (*num2 == '0' && *(num2 + 1) != '\0')
+    {
+        num2++;
+    }
+
+    // Verifica se os números são negativos
+    int isNegative1 = (*num1 == '-');
+    int isNegative2 = (*num2 == '-');
+
+    // Se apenas um é negativo, o negativo é considerado menor
+    if (isNegative1 && !isNegative2)
+    {
+        return 0;
+    }
+    else if (!isNegative1 && isNegative2)
+    {
+        return 1;
+    }
+
+    // Se ambos são negativos, inverte a comparação
+    if (isNegative1 && isNegative2)
+    {
+        return strcmp(num2, num1) > 0;
+    }
+
+    // Obtemos os tamanhos finais após a remoção dos zeros à esquerda
+    int len1 = strlen(num1);
+    int len2 = strlen(num2);
+
+    if (len1 > len2)
+    {
+        return 1;
+    }
+    else if (len1 < len2)
+    {
+        return 0;
+    }
+
+    // Se os tamanhos são iguais, compara numericamente
+    return strcmp(num1, num2) > 0;
+}
+
 // Função auxiliar para duplicar uma string
 static char *my_strdup(const char *str)
 {
@@ -19,30 +70,21 @@ static char *my_strdup(const char *str)
 }
 
 // Função auxiliar para inverter uma string
-static void reverseString(char *str)
+void reverseString(char *str)
 {
     int length = strlen(str);
-    int i, j;
-    for (i = 0, j = length - 1; i < j; i++, j--)
+    for (int i = 0; i < length / 2; i++)
     {
         char temp = str[i];
-        str[i] = str[j];
-        str[j] = temp;
+        str[i] = str[length - i - 1];
+        str[length - i - 1] = temp;
     }
 }
 
 // Função auxiliar para obter o valor numérico de um caractere
 int charToDigit(char c)
 {
-    if (c >= '0' && c <= '9')
-    {
-        return c - '0';
-    }
-    else
-    {
-        fprintf(stderr, "Erro: tentativa de converter um caractere invalido em digito\n");
-        exit(EXIT_FAILURE);
-    }
+    return (c >= '0' && c <= '9') ? c - '0' : 0;
 }
 
 // Função auxiliar para obter o caractere correspondente a um dígito
@@ -55,6 +97,7 @@ char digitToChar(int digit)
     else
     {
         fprintf(stderr, "Erro: tentativa de converter um digito invalido em caractere\n");
+        fprintf(stderr, "Valor do digito: %d\n", digit);
         exit(EXIT_FAILURE);
     }
 }
@@ -95,92 +138,96 @@ char *getBigNumberAsString(const BigNumber *num)
 // Implementação de addBigNumbers
 void addBigNumbers(const BigNumber *num1, const BigNumber *num2, BigNumber *result)
 {
-    const char *str1 = num1->digits;
-    const char *str2 = num2->digits;
-
-    int sign1 = 1;
-    int sign2 = 1;
-
-    // Remove o sinal dos números
-    if (str1[0] == '-')
+    int len1 = strlen(num1->digits);
+    int len2 = strlen(num2->digits);
+    int len = len1 > len2 ? len1 : len2;
+    char *res = (char *)malloc(len + 2); // +2 for possible carry and null terminator
+    if (res == NULL)
     {
-        sign1 = -1;
-        str1++;
-    }
-
-    if (str2[0] == '-')
-    {
-        sign2 = -1;
-        str2++;
-    }
-
-    reverseString(my_strdup(str1)); // Alteração 1
-    reverseString(my_strdup(str2)); // Alteração 1
-
-    int len1 = strlen(str1), len2 = strlen(str2);
-
-    int maxSize = (len1 > len2) ? len1 : len2;
-    maxSize++; // Tamanho máximo do resultado é o máximo entre len1 e len2, mais 1 para o possível carry
-
-    // Realoca a memória do resultado conforme necessário
-    result->digits = (char *)realloc(result->digits, (maxSize + 2) * sizeof(char)); // Alteração 2
-    if (!result->digits)
-    {
-        fprintf(stderr, "Erro na alocação de memória\n");
+        fprintf(stderr, "Erro ao alocar memoria para resultado\n");
         exit(EXIT_FAILURE);
     }
+    memset(res, '0', len + 1);
+    res[len + 1] = '\0'; // Null terminate the string
+
+    int isNegative1 = num1->digits[0] == '-';
+    int isNegative2 = num2->digits[0] == '-';
+
+    reverseString(num1->digits);
+    reverseString(num2->digits);
 
     int carry = 0;
-    int i, sum;
-
-    for (i = 0; i < maxSize || carry; i++)
+    int digit1;
+    int digit2;
+    for (int i = 0; i < len; i++)
     {
-        int digit1 = (i < len1) ? charToDigit(str1[i]) : 0;
-        int digit2 = (i < len2) ? charToDigit(str2[i]) : 0;
-
-        sum = (sign1 * digit1) + (sign2 * digit2) + carry;
-
-        if (sum < 0)
+        digit1 = i < len1 ? abs(charToDigit(num1->digits[i])) : 0;
+        digit2 = i < len2 ? abs(charToDigit(num2->digits[i])) : 0;
+        int sum;
+        if (isNegative1 && isNegative2)
         {
-            sum += 10;
-            carry = -1;
+            sum = digit1 + digit2 + carry;
+        }
+        else if (isNegative1)
+        {
+            sum = (abs(digit1) > digit2) ? (digit1 - digit2 - carry) : (digit2 - digit1 - carry);
+            if (sum < 0)
+            {
+                sum += 10;
+                carry = 1;
+            }
+            else
+            {
+                carry = 0;
+            }
+        }
+        else if (isNegative2)
+        {
+            sum = (abs(digit2) > digit1) ? (digit2 - digit1 - carry) : (digit1 - digit2 - carry);
+            if (sum < 0)
+            {
+                sum += 10;
+                carry = 1;
+            }
+            else
+            {
+                carry = 0;
+            }
         }
         else
         {
-            carry = sum / 10;
+            sum = digit1 + digit2 + carry;
         }
-
-        result->digits[i] = digitToChar(sum % 10);
+        res[i] = digitToChar(sum % 10);
+        carry = sum / 10;
     }
 
-    result->digits[i] = '\0';
-
-    reverseString(result->digits);
-
-    // Adiciona o sinal ao resultado
-    if ((sign1 == -1 && sign2 == -1) || (sign1 == 1 && sign2 == -1 && len2 > len1) ||
-        (sign1 == -1 && sign2 == 1 && len1 > len2))
+    if (carry > 0)
     {
-        // Se ambos são negativos ou num1 é positivo e maior ou igual a num2
-        result->digits = (char *)realloc(result->digits, (i + 2) * sizeof(char));
-        if (!result->digits)
-        {
-            fprintf(stderr, "Erro na alocação de memória\n");
-            exit(EXIT_FAILURE);
-        }
+        res[len] = digitToChar(carry);
+    }
 
-        memmove(result->digits + 1, result->digits, i + 1);
-        result->digits[0] = '-';
-    }
-    else if (result->digits[0] == '0' && result->digits[1] != '\0' && result->digits[1] != '-')
+    reverseString(res);
+    // Remove leading zeros
+    while (*res == '0' && *(res + 1) != '\0')
     {
-        // Remove o zero à esquerda, se o resultado não for zero
-        memmove(result->digits, result->digits + 1, i);
-        result->digits = (char *)realloc(result->digits, i * sizeof(char));
-        if (!result->digits)
-        {
-            fprintf(stderr, "Erro na alocação de memória\n");
-            exit(EXIT_FAILURE);
-        }
+        memmove(res, res + 1, strlen(res));
     }
+
+    if ((isNegative1 && isNegative2))
+    {
+        memmove(res + 1, res, strlen(res) + 1);
+        res[0] = '-';
+    }
+    else if (((isNegative1 && !isNegative2) && (isGreaterThan(num1->digits, num2->digits))) ||
+             ((isNegative2 && !isNegative1) && (isGreaterThan(num2->digits, num1->digits))))
+    {
+        memmove(res + 1, res, strlen(res) + 1);
+        res[0] = '-';
+    }
+    setBigNumberFromString(result, res);
+
+    free(res);
+    reverseString(num1->digits);
+    reverseString(num2->digits);
 }
