@@ -59,6 +59,10 @@ int main()
         addBigNumbers(num1, num2, result);
         break;
         // Adicione outros casos conforme necessário para outras operações
+    
+    case '*':
+        karatsuba(num1, num2, result);
+        break;
 
     default:
         fprintf(stderr, "Operacao nao suportada: %c\n", operation);

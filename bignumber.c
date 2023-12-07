@@ -234,3 +234,69 @@ void addBigNumbers(const BigNumber *num1, const BigNumber *num2, BigNumber *resu
     reverseString(num1->digits);
     reverseString(num2->digits);
 }
+
+//implementação da multiplicação com algoritmo de karatsuba
+int karatsuba (const BigNumber *num1, const BigNumber *num2, BigNumber *result)
+{
+  // Determina o tamanho do menor numero
+  int n = strlen(num1->digits);
+  if (strlen(num2->digits) > n) n = strlen(num2->digits);
+
+  // caso base: tamanho<=2, multiplica direto 
+  if (n <= 2) {
+    long long int aux = atoll(num1->digits) * atoll(num2->digits); // Converte string para long long int
+    char* r = (char*)malloc(sizeof(char) * 21); // Aloca memoria para resultado
+    sprintf(r, "%lld", aux); // Converte long long int para string
+    return r;
+  }
+
+  // completa strings com zeros para ter mesmo tamanho n
+  num1 = (char*)realloc(num1->digits, sizeof(char) * (n + 1));
+  num2 = (char*)realloc(num2->digits, sizeof(char) * (n + 1));
+  for (int i = n - 1; i >= 0; i--) {
+    num1[i + 1] = num1[i]; // coloca caracteres a direita
+  }
+  num1[0] = '0'; // Adiciona 0
+  for (int i = n - 1; i >= 0; i--) {
+    num2[i + 1] = num2[i]; // coloca caracteres a direita
+  }
+  num2[0] = '0'; // Adiciona 0
+
+  // Calculo para subproblemas
+  int shift1 = n / 2 + 1;
+  int shift2 = n / 2;
+  if (n % 2 != 0) {
+    shift1++; // Incrementa espacos vazios
+    shift2++;
+  }
+
+  // extrai sub-strings para cada parte da multiplicação
+  char* num1_1 = strndup(num1, n / 2); // num1_1 é a primeira metade de num1
+  char* num1_2 = strndup(num1 + n / 2, n / 2); // num1_2 é a segunda metade de num1
+  char* num2_1 = strndup(num2, n / 2); // num2_1 é a primeira metade de num2
+  char* num2_2 = strndup(num2 + n / 2, n / 2); // num2_2 é a segunda metade de num2
+
+  // função recursiva
+  char* num1_1num2_1 = karatsuba(num1_1, num2_1, 0); // num1_1 * num2_1
+  char* num1_2num2_2 = karatsuba(num1_2, num2_2, 0); // num2_2 * num2_2
+
+  // Soma subproblemas
+  char* sumAux = addBigNumbers(num1_1num2_1, num1_2num2_2, 0); // num1_1num2_1 + num1_2num2_2
+
+  // Perform subtraction and shifting for the middle term
+  char* num1_1num2_2 = subtractBigNumbers(karatsuba(addBigNumbers(num1_1, num1_2, 0), addBigNumbers(num2_1, num2_2, 0)), sumAux);
+  shift(num1_1num2_2, shift2); // shift a1b2 de shift2
+
+  // soma final
+  char* r = addBigNumbers(addBigNumbers(shift(num1_1num2_1, shift1), num1_1num2_2), num1_2num2_2, 0); // soma de todas as partes
+
+  // libera alocação de memória
+  free(num1_1);
+  free(num1_2);
+  free(num2_1);
+  free(num2_2);
+  free(num1_1num2_1);
+  free(num1_2num2_2);
+  free(sumAux);
+  return r;
+}
