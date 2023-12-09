@@ -11,5 +11,6 @@ void destroyBigNumber(BigNumber *num);
 void setBigNumberFromString(BigNumber *num, const char *str);
 char *getBigNumberAsString(const BigNumber *num);
 void addBigNumbers(const BigNumber *num1, const BigNumber *num2, BigNumber *result);
+void subBigNumbers(const BigNumber *num1, const BigNumber *num2, BigNumber *result);
 
 #endif

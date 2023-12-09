@@ -59,7 +59,9 @@ int main()
         addBigNumbers(num1, num2, result);
         break;
         // Adicione outros casos conforme necessário para outras operações
-    
+    case '-':
+        subBigNumbers(num1, num2, result);
+        break;
     case '*':
         karatsuba(num1, num2, result);
         break;

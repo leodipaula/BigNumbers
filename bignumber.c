@@ -203,7 +203,6 @@ void addBigNumbers(const BigNumber *num1, const BigNumber *num2, BigNumber *resu
         res[i] = digitToChar(sum % 10);
         carry = sum / 10;
     }
-
     if (carry > 0)
     {
         res[len] = digitToChar(carry);
@@ -234,6 +233,155 @@ void addBigNumbers(const BigNumber *num1, const BigNumber *num2, BigNumber *resu
     reverseString(num1->digits);
     reverseString(num2->digits);
 }
+
+void subBigNumbers(const BigNumber *num1, const BigNumber *num2, BigNumber *result)
+{
+    int len1 = strlen(num1->digits);
+    int len2 = strlen(num2->digits);
+    int len = len1 > len2 ? len1 : len2;
+    char *res = (char *)malloc(len + 2); // +2 para possível carry e para '/0'
+    if (res == NULL)
+    {
+        fprintf(stderr, "Erro ao alocar memoria para resultado\n");
+        exit(EXIT_FAILURE);
+    }
+    memset(res, '0', len + 1);
+    res[len + 1] = '\0';
+
+    int isNegative1 = num1->digits[0] == '-';
+    int isNegative2 = num2->digits[0] == '-';
+
+    int aux;
+    if (abs(isGreaterThan(num1->digits, num2->digits)))
+    {
+        aux = 0; 
+    }
+    else
+    {
+        aux = 1; 
+    }
+
+
+    // Inverte os digitos para fazer a sub a mão
+    reverseString(num1->digits);
+    reverseString(num2->digits);
+
+    int carry_sub = 0;
+    int carry = 0;
+    int digit1;
+    int digit2;
+    // Sub a mão
+    for (int i = 0; i < len; i++)
+    {
+        digit1 = i < len1 ? abs(charToDigit(num1->digits[i])) : 0;
+        digit2 = i < len2 ? abs(charToDigit(num2->digits[i])) : 0;
+        int sum;
+        if (isNegative1 && isNegative2)
+        {
+            if(aux == 1)
+            {
+                if(digit1 >= digit2)
+                {
+                    sum = (digit1-carry_sub) - digit2;
+                    carry_sub = 0;
+                }
+                else
+                {
+                    sum = (digit1 + 10 - carry_sub) - digit2;
+                    carry_sub = 1;
+                }
+            }
+            else
+            {
+                if(digit2 >= digit1)
+                {
+                    sum = (digit2-carry_sub) - digit1;
+                    carry_sub = 0;
+                }
+                else
+                {
+                    sum = (digit2 + 10 - carry_sub) - digit1;
+                    carry_sub = 1;
+                }
+            }
+        }
+        else if (isNegative1)
+        {
+            sum = digit1 + digit2 + carry;
+        }
+        else if (isNegative2)
+        {
+            sum = digit1 + digit2 + carry;
+        }
+        else
+        {
+            if(aux == 0)
+            {
+                if(digit1 >= digit2)
+                {
+                    sum = (digit1-carry_sub) - digit2;
+                    carry_sub = 0;
+                }
+                else
+                {
+                    sum = (digit1 + 10 - carry_sub) - digit2;
+                    carry_sub = 1;
+                }
+            }
+            else
+            {
+                if(digit2 >= digit1)
+                {
+                    sum = (digit2-carry_sub) - digit1;
+                    carry_sub = 0;
+                }
+                else
+                {
+                    sum = (digit2 + 10 - carry_sub) - digit1;
+                    carry_sub=1;
+                }
+            }
+        }
+        carry = sum / 10;
+        res[i] = digitToChar(sum);
+    }
+
+    if (carry > 0)
+    {
+        res[len] = digitToChar(carry);
+    }
+
+    reverseString(res);
+    // Remove zeros a esquerda
+    while (*res == '0' && *(res + 1) != '\0')
+    {
+        memmove(res, res + 1, strlen(res));
+    }
+
+    // Adiciona sinal negativo caso necessário
+    if (((isNegative1 && isNegative2)) && (isGreaterThan(num1->digits, num2->digits)))
+    {
+        memmove(res + 1, res, strlen(res) + 1);
+        res[0] = '-';
+    }
+    else if (isNegative1 && !isNegative2)
+    {
+        memmove(res + 1, res, strlen(res) + 1);
+        res[0] = '-';
+    }
+    if (((!isNegative1 && !isNegative2)) && (isGreaterThan(num2->digits, num1->digits)))
+    {
+        memmove(res + 1, res, strlen(res) + 1);
+        res[0] = '-';
+    }
+
+    setBigNumberFromString(result, res);
+
+    free(res);
+    reverseString(num1->digits);
+    reverseString(num2->digits);
+}
+
 
 //implementação da multiplicação com algoritmo de karatsuba
 int karatsuba (const BigNumber *num1, const BigNumber *num2, BigNumber *result)
