@@ -432,7 +432,7 @@ int karatsuba (const BigNumber *num1, const BigNumber *num2, BigNumber *result)
   char* sumAux = addBigNumbers(num1_1num2_1, num1_2num2_2, 0); // num1_1num2_1 + num1_2num2_2
 
   // Perform subtraction and shifting for the middle term
-  char* num1_1num2_2 = subtractBigNumbers(karatsuba(addBigNumbers(num1_1, num1_2, 0), addBigNumbers(num2_1, num2_2, 0)), sumAux);
+  char* num1_1num2_2 = subBigNumbers(karatsuba(addBigNumbers(num1_1, num1_2, 0), addBigNumbers(num2_1, num2_2, 0)), sumAux);
   shift(num1_1num2_2, shift2); // shift a1b2 de shift2
 
   // soma final
