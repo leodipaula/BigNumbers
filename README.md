@@ -35,4 +35,4 @@ A **divisão do trabalho** foi feita da seguinte maneira: Leonardo estruturou to
 o problema incial de receber os numeros gigantes e somá-los, enquanto que Vinicius implementou a função de subtrai-los e Aymê, iniciou a solução para 
 multiplicá-los com o algoritmo de karatsuba, juntamente com os demais integrantes, posteriormente resolvida da forma tradicional, por Leonardo.
 
-A organização e desenvolvoimento do trabalho foram feitos colaborativamente no **Git**, o repositório hospedado no **GitHub** está disponível em: [Repositório BigNumber](github.com/leodipaula/BigNumbers)
+A organização e desenvolvoimento do trabalho foram feitos colaborativamente no **Git**, o repositório hospedado no **GitHub** está disponível em: [Repositório BigNumber](https://github.com/leodipaula/BigNumbers)
