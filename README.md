@@ -4,7 +4,9 @@ Projeto à matéria Programação Estruturada - UFABC. O projeto visa somar, sub
 **Integrantes:**
 
 Aymê Cardoso Gonçalves - RA: 11202111547
+
 Leonardo de Paula Fernandes - RA: 11202131805
+
 Vinicius Lopes Romero - RA: 11202111495
 
   
