@@ -9,10 +9,13 @@ Leonardo de Paula Fernandes - RA: 11202131805
 Vinicius Lopes Romero - RA: 11202111495
 
 
+
+
 Em nosso trabalho, o BigNumber foi representado através de uma string, aplicando uma lista com os dígitos, além da funcionalidade de leitura dinâmica.
 A adição e subtração são realizadas manualmente, operando individualmente nos dígitos e evitando alocações desnecessárias de memória, o método de 
 "papel e caneta" particiona o problema inicial em problemas menores, evitando uma possível sobrecarga na máquina, o que melhora o tempo de execução
 do código, que com a incoporação de técnicas de reversão de strings o torna ainda mais eficiente.
+
 
 
 
@@ -29,10 +32,12 @@ Essas são as funções disponíveis para manipulação de números grandes (Big
 
 
 
+
 A **divisão do trabalho** foi feita da seguinte maneira: Leonardo estruturou todos os arquivos (bignumber.h, client.c, bignumber.c e makefile), solucionando
 o problema incial de receber os numeros gigantes e somá-los, enquanto que Vinicius implementou a função de subtrai-los e Aymê, iniciou a solução para 
 multiplicá-los com o algoritmo de karatsuba, juntamente com os demais integrantes, posteriormente resolvida da forma tradicional, por Leonardo.
 
 
 
-A organização e desenvolvoimento do trabalho foram feitos colaborativamente no **Git**, o repositório hospedado no **GitHub** está disponível em: [texto](github.com/leodipaula/BigNumbers)
+
+A organização e desenvolvoimento do trabalho foram feitos colaborativamente no **Git**, o repositório hospedado no **GitHub** está disponível em: [Repositório BigNumber](github.com/leodipaula/BigNumbers)
