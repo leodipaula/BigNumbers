@@ -2,11 +2,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#define MAX(x, y) (((x) > (y)) ? (x) : (y))
 
-// Função que compara se o primeiro número é maior que o segundo
 int isGreaterThan(const char *num1, const char *num2)
 {
-    // Remove possíveis zeros à esquerda
     while (*num1 == '0' && *(num1 + 1) != '\0')
     {
         num1++;
@@ -17,44 +16,30 @@ int isGreaterThan(const char *num1, const char *num2)
         num2++;
     }
 
-    // Verifica se os números são negativos
     int isNegative1 = (*num1 == '-');
     int isNegative2 = (*num2 == '-');
 
-    // Se apenas um é negativo, o negativo é considerado menor
     if (isNegative1 && !isNegative2)
-    {
         return 0;
-    }
-    else if (!isNegative1 && isNegative2)
-    {
+
+    if (!isNegative1 && isNegative2)
         return 1;
-    }
 
-    // Se ambos são negativos, inverte a comparação
     if (isNegative1 && isNegative2)
-    {
         return strcmp(num2, num1) > 0;
-    }
 
-    // Obtemos os tamanhos finais após a remoção dos zeros à esquerda
     int len1 = strlen(num1);
     int len2 = strlen(num2);
 
     if (len1 > len2)
-    {
         return 1;
-    }
-    else if (len1 < len2)
-    {
-        return 0;
-    }
 
-    // Se os tamanhos são iguais, compara numericamente
+    if (len1 < len2)
+        return 0;
+
     return strcmp(num1, num2) > 0;
 }
 
-// Função auxiliar para duplicar uma string
 static char *my_strdup(const char *str)
 {
     size_t len = strlen(str) + 1;
@@ -69,7 +54,6 @@ static char *my_strdup(const char *str)
     return strcpy(new_str, str);
 }
 
-// Função auxiliar para inverter uma string
 void reverseString(char *str)
 {
     int length = strlen(str);
@@ -81,19 +65,15 @@ void reverseString(char *str)
     }
 }
 
-// Função auxiliar para obter o valor numérico de um caractere
 int charToDigit(char c)
 {
     return (c >= '0' && c <= '9') ? c - '0' : 0;
 }
 
-// Função auxiliar para obter o caractere correspondente a um dígito
 char digitToChar(int digit)
 {
     if (digit >= 0 && digit <= 9)
-    {
         return '0' + digit;
-    }
     else
     {
         fprintf(stderr, "Erro: tentativa de converter um digito invalido em caractere\n");
@@ -102,7 +82,6 @@ char digitToChar(int digit)
     }
 }
 
-// Implementação de createBigNumber
 BigNumber *createBigNumber()
 {
     BigNumber *num = (BigNumber *)malloc(sizeof(BigNumber));
@@ -115,33 +94,36 @@ BigNumber *createBigNumber()
     return num;
 }
 
-// Implementação de destroyBigNumber
 void destroyBigNumber(BigNumber *num)
 {
     free(num->digits);
     free(num);
 }
 
-// Implementação de setBigNumberFromString
 void setBigNumberFromString(BigNumber *num, const char *str)
 {
-    free(num->digits); // Libera a memória existente, se houver
-    num->digits = my_strdup(str);
+    free(num->digits);
+    int len = strlen(str);
+    num->digits = (char *)malloc(len + 1);
+    if (num->digits == NULL)
+    {
+        fprintf(stderr, "Erro ao alocar memoria para os digitos do BigNumber\n");
+        exit(EXIT_FAILURE);
+    }
+    strcpy(num->digits, str);
 }
 
-// Implementação de getBigNumberAsString
 char *getBigNumberAsString(const BigNumber *num)
 {
     return my_strdup(num->digits);
 }
 
-// Implementação de addBigNumbers
 void addBigNumbers(const BigNumber *num1, const BigNumber *num2, BigNumber *result)
 {
     int len1 = strlen(num1->digits);
     int len2 = strlen(num2->digits);
     int len = len1 > len2 ? len1 : len2;
-    char *res = (char *)malloc(len + 2); // +2 para possível carry e para '/0'
+    char *res = (char *)malloc(len + 2);
     if (res == NULL)
     {
         fprintf(stderr, "Erro ao alocar memoria para resultado\n");
@@ -254,13 +236,12 @@ void subBigNumbers(const BigNumber *num1, const BigNumber *num2, BigNumber *resu
     int aux;
     if (abs(isGreaterThan(num1->digits, num2->digits)))
     {
-        aux = 0; 
+        aux = 0;
     }
     else
     {
-        aux = 1; 
+        aux = 1;
     }
-
 
     // Inverte os digitos para fazer a sub a mão
     reverseString(num1->digits);
@@ -278,11 +259,11 @@ void subBigNumbers(const BigNumber *num1, const BigNumber *num2, BigNumber *resu
         int sum;
         if (isNegative1 && isNegative2)
         {
-            if(aux == 1)
+            if (aux == 1)
             {
-                if(digit1 >= digit2)
+                if (digit1 >= digit2)
                 {
-                    sum = (digit1-carry_sub) - digit2;
+                    sum = (digit1 - carry_sub) - digit2;
                     carry_sub = 0;
                 }
                 else
@@ -293,9 +274,9 @@ void subBigNumbers(const BigNumber *num1, const BigNumber *num2, BigNumber *resu
             }
             else
             {
-                if(digit2 >= digit1)
+                if (digit2 >= digit1)
                 {
-                    sum = (digit2-carry_sub) - digit1;
+                    sum = (digit2 - carry_sub) - digit1;
                     carry_sub = 0;
                 }
                 else
@@ -315,11 +296,11 @@ void subBigNumbers(const BigNumber *num1, const BigNumber *num2, BigNumber *resu
         }
         else
         {
-            if(aux == 0)
+            if (aux == 0)
             {
-                if(digit1 >= digit2)
+                if (digit1 >= digit2)
                 {
-                    sum = (digit1-carry_sub) - digit2;
+                    sum = (digit1 - carry_sub) - digit2;
                     carry_sub = 0;
                 }
                 else
@@ -330,15 +311,15 @@ void subBigNumbers(const BigNumber *num1, const BigNumber *num2, BigNumber *resu
             }
             else
             {
-                if(digit2 >= digit1)
+                if (digit2 >= digit1)
                 {
-                    sum = (digit2-carry_sub) - digit1;
+                    sum = (digit2 - carry_sub) - digit1;
                     carry_sub = 0;
                 }
                 else
                 {
                     sum = (digit2 + 10 - carry_sub) - digit1;
-                    carry_sub=1;
+                    carry_sub = 1;
                 }
             }
         }
@@ -382,69 +363,102 @@ void subBigNumbers(const BigNumber *num1, const BigNumber *num2, BigNumber *resu
     reverseString(num2->digits);
 }
 
-
-//implementação da multiplicação com algoritmo de karatsuba
-int karatsuba (const BigNumber *num1, const BigNumber *num2, BigNumber *result)
+void multiplyStrings(char *num1, char *num2, char *result)
 {
-  // Determina o tamanho do menor numero
-  int n = strlen(num1->digits);
-  if (strlen(num2->digits) > n) n = strlen(num2->digits);
+    int len1 = strlen(num1);
+    int len2 = strlen(num2);
 
-  // caso base: tamanho<=2, multiplica direto 
-  if (n <= 2) {
-    long long int aux = atoll(num1->digits) * atoll(num2->digits); // Converte string para long long int
-    char* r = (char*)malloc(sizeof(char) * 21); // Aloca memoria para resultado
-    sprintf(r, "%lld", aux); // Converte long long int para string
-    return r;
-  }
+    // Flag para verificar se o resultado deve ser negativo
+    int isNegativeResult = 0;
 
-  // completa strings com zeros para ter mesmo tamanho n
-  num1 = (char*)realloc(num1->digits, sizeof(char) * (n + 1));
-  num2 = (char*)realloc(num2->digits, sizeof(char) * (n + 1));
-  for (int i = n - 1; i >= 0; i--) {
-    num1[i + 1] = num1[i]; // coloca caracteres a direita
-  }
-  num1[0] = '0'; // Adiciona 0
-  for (int i = n - 1; i >= 0; i--) {
-    num2[i + 1] = num2[i]; // coloca caracteres a direita
-  }
-  num2[0] = '0'; // Adiciona 0
+    // Verifica se o primeiro número é negativo
+    if (num1[0] == '-')
+    {
+        isNegativeResult = !isNegativeResult;
+        memmove(num1, num1 + 1, len1); // Remove o sinal
+        len1--;
+    }
 
-  // Calculo para subproblemas
-  int shift1 = n / 2 + 1;
-  int shift2 = n / 2;
-  if (n % 2 != 0) {
-    shift1++; // Incrementa espacos vazios
-    shift2++;
-  }
+    // Verifica se o segundo número é negativo
+    if (num2[0] == '-')
+    {
+        isNegativeResult = !isNegativeResult;
+        memmove(num2, num2 + 1, len2); // Remove o sinal
+        len2--;
+    }
 
-  // extrai sub-strings para cada parte da multiplicação
-  char* num1_1 = strndup(num1, n / 2); // num1_1 é a primeira metade de num1
-  char* num1_2 = strndup(num1 + n / 2, n / 2); // num1_2 é a segunda metade de num1
-  char* num2_1 = strndup(num2, n / 2); // num2_1 é a primeira metade de num2
-  char* num2_2 = strndup(num2 + n / 2, n / 2); // num2_2 é a segunda metade de num2
+    // Reversing the strings
+    reverseString(num1);
+    reverseString(num2);
 
-  // função recursiva
-  char* num1_1num2_1 = karatsuba(num1_1, num2_1, 0); // num1_1 * num2_1
-  char* num1_2num2_2 = karatsuba(num1_2, num2_2, 0); // num2_2 * num2_2
+    int *m = calloc(len1 + len2, sizeof(int));
 
-  // Soma subproblemas
-  char* sumAux = addBigNumbers(num1_1num2_1, num1_2num2_2, 0); // num1_1num2_1 + num1_2num2_2
+    for (int i = 0; i < len1; i++)
+    {
+        for (int j = 0; j < len2; j++)
+        {
+            m[i + j] += (num1[i] - '0') * (num2[j] - '0');
+        }
+    }
 
-  // Perform subtraction and shifting for the middle term
-  char* num1_1num2_2 = subtractBigNumbers(karatsuba(addBigNumbers(num1_1, num1_2, 0), addBigNumbers(num2_1, num2_2, 0)), sumAux);
-  shift(num1_1num2_2, shift2); // shift a1b2 de shift2
+    for (int i = 0; i < len1 + len2; i++)
+    {
+        int digit = m[i] % 10;
+        int carry = m[i] / 10;
+        if (i + 1 < len1 + len2)
+        {
+            m[i + 1] += carry;
+        }
+        result[i] = digit + '0';
+    }
 
-  // soma final
-  char* r = addBigNumbers(addBigNumbers(shift(num1_1num2_1, shift1), num1_1num2_2), num1_2num2_2, 0); // soma de todas as partes
+    // Ignore leading zeros
+    int i = len1 + len2 - 1;
+    while (i > 0 && result[i] == '0')
+    {
+        i--;
+    }
+    result[i + 1] = '\0';
 
-  // libera alocação de memória
-  free(num1_1);
-  free(num1_2);
-  free(num2_1);
-  free(num2_2);
-  free(num1_1num2_1);
-  free(num1_2num2_2);
-  free(sumAux);
-  return r;
+    // Reverse the result
+    reverseString(result);
+
+    // Adiciona o sinal negativo, se necessário
+    if (isNegativeResult && result[0] != '0')
+    {
+        memmove(result + 1, result, strlen(result) + 1);
+        result[0] = '-';
+    }
+
+    free(m);
+}
+
+void multiplyBigNumbers(const BigNumber *num1, const BigNumber *num2, BigNumber *result)
+{
+    char *strNum1 = getBigNumberAsString(num1);
+    char *strNum2 = getBigNumberAsString(num2);
+
+    while (*strNum1 == '0' && *(strNum1 + 1) != '\0')
+    {
+        strNum1++;
+    }
+    while (*strNum2 == '0' && *(strNum2 + 1) != '\0')
+    {
+        strNum2++;
+    }
+
+    char *resultStr = (char *)malloc(MAX(strlen(strNum1), strlen(strNum2)) * 2 + 1);
+    if (resultStr == NULL)
+    {
+        fprintf(stderr, "Erro ao alocar memoria para resultado\n");
+        exit(EXIT_FAILURE);
+    }
+
+    multiplyStrings(strNum1, strNum2, resultStr);
+
+    setBigNumberFromString(result, resultStr);
+
+    free(strNum1);
+    free(strNum2);
+    free(resultStr);
 }

@@ -3,7 +3,6 @@
 #include <stdlib.h>
 #include <strings.h>
 
-// Função para a leitura dinâmica de uma linha com tratamento de erros
 char *readDynamicLine()
 {
     char *line = NULL;
@@ -15,11 +14,11 @@ char *readDynamicLine()
     {
         if (index == len)
         {
-            len += 10; // Aumentar o tamanho do buffer, se necessário
+            len += 10;
             line = realloc(line, len);
             if (line == NULL)
             {
-                fprintf(stderr, "Erro na alocação de memória\n");
+                fprintf(stderr, "Erro na alocacao de memoria\n");
                 exit(EXIT_FAILURE);
             }
         }
@@ -28,7 +27,6 @@ char *readDynamicLine()
 
     if (index == 0 && c == EOF)
     {
-        // Nenhum caractere lido e encontramos EOF
         free(line);
         return NULL;
     }
@@ -45,7 +43,6 @@ int main()
     BigNumber *result = createBigNumber();
     char operation, *strNum1, *strNum2;
 
-    // Leitura dinâmica das strings com tratamento de erros
     strNum1 = readDynamicLine();
     strNum2 = readDynamicLine();
     scanf(" %c", &operation);
@@ -58,14 +55,12 @@ int main()
     case '+':
         addBigNumbers(num1, num2, result);
         break;
-        // Adicione outros casos conforme necessário para outras operações
     case '-':
         subBigNumbers(num1, num2, result);
         break;
     case '*':
-        karatsuba(num1, num2, result);
+        multiplyBigNumbers(num1, num2, result);
         break;
-
     default:
         fprintf(stderr, "Operacao nao suportada: %c\n", operation);
         break;
