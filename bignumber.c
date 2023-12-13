@@ -6,15 +6,11 @@
 
 int isGreaterThan(const char *num1, const char *num2)
 {
-    while (*num1 == '0' && *(num1 + 1) != '\0')
-    {
+    // Ignora os zeros à esquerda
+    while (*num1 == '0')
         num1++;
-    }
-
-    while (*num2 == '0' && *(num2 + 1) != '\0')
-    {
+    while (*num2 == '0')
         num2++;
-    }
 
     int isNegative1 = (*num1 == '-');
     int isNegative2 = (*num2 == '-');
@@ -25,18 +21,7 @@ int isGreaterThan(const char *num1, const char *num2)
     if (!isNegative1 && isNegative2)
         return 1;
 
-    if (isNegative1 && isNegative2)
-        return strcmp(num2, num1) > 0;
-
-    int len1 = strlen(num1);
-    int len2 = strlen(num2);
-
-    if (len1 > len2)
-        return 1;
-
-    if (len1 < len2)
-        return 0;
-
+    // Ambos são negativos, ou ambos são positivos
     return strcmp(num1, num2) > 0;
 }
 
@@ -145,16 +130,17 @@ void addBigNumbers(const BigNumber *num1, const BigNumber *num2, BigNumber *resu
     // Soma a mão
     for (int i = 0; i < len; i++)
     {
-        digit1 = i < len1 ? abs(charToDigit(num1->digits[i])) : 0;
-        digit2 = i < len2 ? abs(charToDigit(num2->digits[i])) : 0;
+        digit1 = i < len1 ? charToDigit(num1->digits[i]) : 0;
+        digit2 = i < len2 ? charToDigit(num2->digits[i]) : 0;
         int sum;
         if (isNegative1 && isNegative2)
         {
             sum = digit1 + digit2 + carry;
+            carry = sum / 10;
         }
         else if (isNegative1)
         {
-            sum = (abs(digit1) > digit2) ? (digit1 - digit2 - carry) : (digit2 - digit1 - carry);
+            sum = digit1 - digit2 - carry;
             if (sum < 0)
             {
                 sum += 10;
@@ -167,7 +153,7 @@ void addBigNumbers(const BigNumber *num1, const BigNumber *num2, BigNumber *resu
         }
         else if (isNegative2)
         {
-            sum = (abs(digit2) > digit1) ? (digit2 - digit1 - carry) : (digit1 - digit2 - carry);
+            sum = digit1 - digit2 - carry;
             if (sum < 0)
             {
                 sum += 10;
@@ -181,9 +167,9 @@ void addBigNumbers(const BigNumber *num1, const BigNumber *num2, BigNumber *resu
         else
         {
             sum = digit1 + digit2 + carry;
+            carry = sum / 10;
         }
         res[i] = digitToChar(sum % 10);
-        carry = sum / 10;
     }
     if (carry > 0)
     {
@@ -191,6 +177,8 @@ void addBigNumbers(const BigNumber *num1, const BigNumber *num2, BigNumber *resu
     }
 
     reverseString(res);
+    reverseString(num1->digits);
+    reverseString(num2->digits);
     // Remove zeros a esquerda
     while (*res == '0' && *(res + 1) != '\0')
     {
@@ -198,169 +186,38 @@ void addBigNumbers(const BigNumber *num1, const BigNumber *num2, BigNumber *resu
     }
 
     // Adiciona sinal negativo caso necessário
-    if ((isNegative1 && isNegative2))
+    if ((isNegative1 && isNegative2) ||
+        ((isNegative1 && !isNegative2) && (isGreaterThan(num1->digits, num2->digits))) ||
+        ((!isNegative1 && isNegative2) && (isGreaterThan(num2->digits, num1->digits))))
     {
+        // Adiciona o sinal negativo ao resultado
         memmove(res + 1, res, strlen(res) + 1);
         res[0] = '-';
     }
-    else if (((isNegative1 && !isNegative2) && (isGreaterThan(num1->digits, num2->digits))) ||
-             ((isNegative2 && !isNegative1) && (isGreaterThan(num2->digits, num1->digits))))
-    {
-        memmove(res + 1, res, strlen(res) + 1);
-        res[0] = '-';
-    }
+
     setBigNumberFromString(result, res);
 
     free(res);
-    reverseString(num1->digits);
-    reverseString(num2->digits);
 }
 
-void subBigNumbers(const BigNumber *num1, const BigNumber *num2, BigNumber *result)
+void subBigNumbers(BigNumber *num1, BigNumber *num2, BigNumber *result)
 {
-    int len1 = strlen(num1->digits);
-    int len2 = strlen(num2->digits);
-    int len = len1 > len2 ? len1 : len2;
-    char *res = (char *)malloc(len + 2); // +2 para possível carry e para '/0'
-    if (res == NULL)
-    {
-        fprintf(stderr, "Erro ao alocar memoria para resultado\n");
-        exit(EXIT_FAILURE);
-    }
-    memset(res, '0', len + 1);
-    res[len + 1] = '\0';
-
-    int isNegative1 = num1->digits[0] == '-';
     int isNegative2 = num2->digits[0] == '-';
 
-    int aux;
-    if (abs(isGreaterThan(num1->digits, num2->digits)))
+    if (isNegative2)
     {
-        aux = 0;
+        // Retira o sinal do segundo número, pois -a - (-b) = -a + b ou a - (-b) = a + b
+        num2->digits++;
+        printf("%s", num2->digits);
+        addBigNumbers(num1, num2, result);
     }
     else
     {
-        aux = 1;
+        // Significa a + (-b), então adiciona o sinal negativo a b e chama a função soma
+        memmove(num2->digits + 1, num2->digits, strlen(num2->digits) + 1);
+        num2->digits[0] = '-';
+        addBigNumbers(num1, num2, result);
     }
-
-    // Inverte os digitos para fazer a sub a mão
-    reverseString(num1->digits);
-    reverseString(num2->digits);
-
-    int carry_sub = 0;
-    int carry = 0;
-    int digit1;
-    int digit2;
-    // Sub a mão
-    for (int i = 0; i < len; i++)
-    {
-        digit1 = i < len1 ? abs(charToDigit(num1->digits[i])) : 0;
-        digit2 = i < len2 ? abs(charToDigit(num2->digits[i])) : 0;
-        int sum;
-        if (isNegative1 && isNegative2)
-        {
-            if (aux == 1)
-            {
-                if (digit1 >= digit2)
-                {
-                    sum = (digit1 - carry_sub) - digit2;
-                    carry_sub = 0;
-                }
-                else
-                {
-                    sum = (digit1 + 10 - carry_sub) - digit2;
-                    carry_sub = 1;
-                }
-            }
-            else
-            {
-                if (digit2 >= digit1)
-                {
-                    sum = (digit2 - carry_sub) - digit1;
-                    carry_sub = 0;
-                }
-                else
-                {
-                    sum = (digit2 + 10 - carry_sub) - digit1;
-                    carry_sub = 1;
-                }
-            }
-        }
-        else if (isNegative1)
-        {
-            sum = digit1 + digit2 + carry;
-        }
-        else if (isNegative2)
-        {
-            sum = digit1 + digit2 + carry;
-        }
-        else
-        {
-            if (aux == 0)
-            {
-                if (digit1 >= digit2)
-                {
-                    sum = (digit1 - carry_sub) - digit2;
-                    carry_sub = 0;
-                }
-                else
-                {
-                    sum = (digit1 + 10 - carry_sub) - digit2;
-                    carry_sub = 1;
-                }
-            }
-            else
-            {
-                if (digit2 >= digit1)
-                {
-                    sum = (digit2 - carry_sub) - digit1;
-                    carry_sub = 0;
-                }
-                else
-                {
-                    sum = (digit2 + 10 - carry_sub) - digit1;
-                    carry_sub = 1;
-                }
-            }
-        }
-        carry = sum / 10;
-        res[i] = digitToChar(sum);
-    }
-
-    if (carry > 0)
-    {
-        res[len] = digitToChar(carry);
-    }
-
-    reverseString(res);
-    // Remove zeros a esquerda
-    while (*res == '0' && *(res + 1) != '\0')
-    {
-        memmove(res, res + 1, strlen(res));
-    }
-
-    // Adiciona sinal negativo caso necessário
-    if (((isNegative1 && isNegative2)) && (isGreaterThan(num1->digits, num2->digits)))
-    {
-        memmove(res + 1, res, strlen(res) + 1);
-        res[0] = '-';
-    }
-    else if (isNegative1 && !isNegative2)
-    {
-        memmove(res + 1, res, strlen(res) + 1);
-        res[0] = '-';
-    }
-    if (((!isNegative1 && !isNegative2)) && (isGreaterThan(num2->digits, num1->digits)))
-    {
-        memmove(res + 1, res, strlen(res) + 1);
-        res[0] = '-';
-    }
-
-    setBigNumberFromString(result, res);
-
-    free(res);
-    reverseString(num1->digits);
-    reverseString(num2->digits);
 }
 
 void multiplyStrings(char *num1, char *num2, char *result)

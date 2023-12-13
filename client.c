@@ -10,7 +10,7 @@ char *readDynamicLine()
     int c;
     size_t index = 0;
 
-    while ((c = getchar()) != EOF && c != '\n')
+    while ((c = getchar()) != EOF && c != '\n' && c != ' ')
     {
         if (index == len)
         {
@@ -43,33 +43,43 @@ int main()
     BigNumber *result = createBigNumber();
     char operation, *strNum1, *strNum2;
 
-    strNum1 = readDynamicLine();
-    strNum2 = readDynamicLine();
-    scanf(" %c", &operation);
-
-    setBigNumberFromString(num1, strNum1);
-    setBigNumberFromString(num2, strNum2);
-
-    switch (operation)
+    while (1)
     {
-    case '+':
-        addBigNumbers(num1, num2, result);
-        break;
-    case '-':
-        subBigNumbers(num1, num2, result);
-        break;
-    case '*':
-        multiplyBigNumbers(num1, num2, result);
-        break;
-    default:
-        fprintf(stderr, "Operacao nao suportada: %c\n", operation);
-        break;
+        strNum1 = readDynamicLine();
+        if (strNum1 == NULL)
+            break;
+        strNum2 = readDynamicLine();
+        if (strNum2 == NULL)
+            break;
+        operation = getchar(); // read the operation
+        getchar();             // consume the newline
+
+        setBigNumberFromString(num1, strNum1);
+        setBigNumberFromString(num2, strNum2);
+
+        switch (operation)
+        {
+        case '+':
+            addBigNumbers(num1, num2, result);
+            break;
+        case '-':
+            subBigNumbers(num1, num2, result);
+            break;
+        case '*':
+            multiplyBigNumbers(num1, num2, result);
+            break;
+        default:
+            fprintf(stderr, "Operacao nao suportada: %c\n", operation);
+            break;
+        }
+
+        printf("%s\n", result->digits);
+        fflush(stdout);
+
+        free(strNum1);
+        free(strNum2);
     }
 
-    printf("%s\n", result->digits);
-
-    free(strNum1);
-    free(strNum2);
     destroyBigNumber(num1);
     destroyBigNumber(num2);
     destroyBigNumber(result);
