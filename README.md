@@ -34,7 +34,7 @@ Essas são as funções disponíveis para manipulação de números grandes (Big
 
   
 A **divisão do trabalho** foi feita da seguinte maneira: Leonardo estruturou todos os arquivos (bignumber.h, client.c, bignumber.c e makefile), solucionando
-o problema incial de receber os numeros gigantes e somá-los, enquanto que Vinicius implementou a função de subtrai-los e Aymê, iniciou a solução para 
-multiplicá-los com o algoritmo de karatsuba, juntamente com os demais integrantes, posteriormente resolvida da forma tradicional, por Leonardo.
+o problema incial de receber os numeros gigantes e somá-los, e o problema final de fazer o programa rodar em loop até o usuário encerrar o teclado ou a leitura do arquivo redirecionado chegar ao fim, enquanto que Vinicius iniciou a implementação da função de subtrai-los, posteriormente mudada por Leonardo para que a função de subtração faça proveito da função soma, pois a função de subtração estava enfrentando muitos problemas de complexidade, e Aymê fez o README.md, e também iniciou a solução de 
+multiplicação com o algoritmo de karatsuba, juntamente com os demais integrantes, posteriormente resolvida da forma tradicional, por Leonardo.
 
 A organização e desenvolvoimento do trabalho foram feitos colaborativamente no **Git**, o repositório hospedado no **GitHub** está disponível em: [Repositório BigNumber](https://github.com/leodipaula/BigNumbers)

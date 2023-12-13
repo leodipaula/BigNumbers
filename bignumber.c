@@ -12,16 +12,15 @@ int isGreaterThan(const char *num1, const char *num2)
     while (*num2 == '0')
         num2++;
 
+    // Ignora o sinal
     int isNegative1 = (*num1 == '-');
     int isNegative2 = (*num2 == '-');
 
-    if (isNegative1 && !isNegative2)
-        return 0;
+    if (isNegative1)
+        num1++;
+    if (isNegative2)
+        num2++;
 
-    if (!isNegative1 && isNegative2)
-        return 1;
-
-    // Ambos são negativos, ou ambos são positivos
     return strcmp(num1, num2) > 0;
 }
 
@@ -130,17 +129,16 @@ void addBigNumbers(const BigNumber *num1, const BigNumber *num2, BigNumber *resu
     // Soma a mão
     for (int i = 0; i < len; i++)
     {
-        digit1 = i < len1 ? charToDigit(num1->digits[i]) : 0;
-        digit2 = i < len2 ? charToDigit(num2->digits[i]) : 0;
+        digit1 = i < len1 ? abs(charToDigit(num1->digits[i])) : 0;
+        digit2 = i < len2 ? abs(charToDigit(num2->digits[i])) : 0;
         int sum;
         if (isNegative1 && isNegative2)
         {
             sum = digit1 + digit2 + carry;
-            carry = sum / 10;
         }
         else if (isNegative1)
         {
-            sum = digit1 - digit2 - carry;
+            sum = (abs(digit1) > digit2) ? (digit1 - digit2 - carry) : (digit2 - digit1 - carry);
             if (sum < 0)
             {
                 sum += 10;
@@ -153,7 +151,7 @@ void addBigNumbers(const BigNumber *num1, const BigNumber *num2, BigNumber *resu
         }
         else if (isNegative2)
         {
-            sum = digit1 - digit2 - carry;
+            sum = (abs(digit2) > digit1) ? (digit2 - digit1 - carry) : (digit1 - digit2 - carry);
             if (sum < 0)
             {
                 sum += 10;
@@ -167,9 +165,9 @@ void addBigNumbers(const BigNumber *num1, const BigNumber *num2, BigNumber *resu
         else
         {
             sum = digit1 + digit2 + carry;
-            carry = sum / 10;
         }
         res[i] = digitToChar(sum % 10);
+        carry = sum / 10;
     }
     if (carry > 0)
     {
@@ -186,15 +184,17 @@ void addBigNumbers(const BigNumber *num1, const BigNumber *num2, BigNumber *resu
     }
 
     // Adiciona sinal negativo caso necessário
-    if ((isNegative1 && isNegative2) ||
-        ((isNegative1 && !isNegative2) && (isGreaterThan(num1->digits, num2->digits))) ||
-        ((!isNegative1 && isNegative2) && (isGreaterThan(num2->digits, num1->digits))))
+    if ((isNegative1 && isNegative2))
     {
-        // Adiciona o sinal negativo ao resultado
         memmove(res + 1, res, strlen(res) + 1);
         res[0] = '-';
     }
-
+    else if (((isNegative1 && !isNegative2) && (isGreaterThan(num1->digits, num2->digits))) ||
+             ((isNegative2 && !isNegative1) && (isGreaterThan(num2->digits, num1->digits))))
+    {
+        memmove(res + 1, res, strlen(res) + 1);
+        res[0] = '-';
+    }
     setBigNumberFromString(result, res);
 
     free(res);
@@ -208,7 +208,6 @@ void subBigNumbers(BigNumber *num1, BigNumber *num2, BigNumber *result)
     {
         // Retira o sinal do segundo número, pois -a - (-b) = -a + b ou a - (-b) = a + b
         num2->digits++;
-        printf("%s", num2->digits);
         addBigNumbers(num1, num2, result);
     }
     else

@@ -14,13 +14,15 @@ char *readDynamicLine()
     {
         if (index == len)
         {
-            len += 10;
-            line = realloc(line, len);
-            if (line == NULL)
+            len += 50;
+            char *newLine = realloc(line, len);
+            if (newLine == NULL)
             {
-                fprintf(stderr, "Erro na alocacao de memoria\n");
+                fprintf(stderr, "Erro na realocacao de memoria. Tentativa de alocar %zu bytes.\n", len);
+                free(line); // Liberar a memória alocada antes de sair
                 exit(EXIT_FAILURE);
             }
+            line = newLine;
         }
         line[index++] = (char)c;
     }
